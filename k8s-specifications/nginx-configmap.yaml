@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><meta charset="UTF-8"><title>Welcome to Nginx</title></head>
+    <body>
+      <h1>Hello, Nginx is running!</h1>
+      <p><a href="/app/">Open Hello-App</a></p>
+    </body>
+    </html>
+
+  nginx.conf: |
+    events { worker_connections 1024; }
+    http {
+      server {
+        listen 80;
+        root /usr/share/nginx/html;
+        index index.html;
+        location / { try_files $uri $uri/ =404; }
+        location /app/ {
+          rewrite ^/app/(.*)$ /$1 break;
+          proxy_pass http://hello-app:8000;
+        }
+      }
+    }
